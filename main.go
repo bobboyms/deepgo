@@ -4,7 +4,6 @@ import (
 	"tensors-processing/activation"
 	"tensors-processing/linalg"
 	"tensors-processing/nn"
-	"tensors-processing/nn/layer"
 )
 
 func CreateArr(a int) []float64 {
@@ -18,13 +17,11 @@ func CreateArr(a int) []float64 {
 func main() {
 
 	input := linalg.NewMatrix([]float64{2, 4, 6}, 1, 3)
-	//lay := layer.NewDense(3, 4, activation.Softmax)
-	//lay.Forward(input).Print()
 
-	rnn := nn.NewRNN([]layer.Dense{
-		layer.NewDense(3, 4, activation.None),
-		layer.NewDense(4, 8, activation.None),
-		layer.NewDense(8, 2, activation.None),
+	rnn := nn.NewSequential([]nn.Layer{
+		nn.NewDense(3, 4, activation.None),
+		nn.NewDense(4, 8, activation.None),
+		nn.NewDense(8, 2, activation.None),
 	})
 
 	rnn.Predict(input).Print()

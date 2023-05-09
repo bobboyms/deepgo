@@ -1,4 +1,4 @@
-package layer
+package nn
 
 import (
 	"tensors-processing/linalg"
@@ -10,12 +10,12 @@ type Dense struct {
 	Activation func(matrix linalg.Matrix[float64]) linalg.Matrix[float64]
 }
 
-func NewDense(numInputs, numNeurons int, activation func(matrix linalg.Matrix[float64]) linalg.Matrix[float64]) Dense {
+func NewDense(numInputs, numNeurons int, activation func(matrix linalg.Matrix[float64]) linalg.Matrix[float64]) Layer {
 
 	w := linalg.CreateRandomData(numInputs * numNeurons)
 	b := linalg.CreateRandomData(numNeurons)
 
-	return Dense{
+	return &Dense{
 		Activation: activation,
 		Weights:    linalg.NewMatrix(w, numInputs, numNeurons),
 		Biases:     linalg.NewMatrix(b, 1, numNeurons),

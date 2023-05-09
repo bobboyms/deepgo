@@ -2,20 +2,19 @@ package nn
 
 import (
 	"tensors-processing/linalg"
-	"tensors-processing/nn/layer"
 )
 
-type RNN struct {
-	Layers []layer.Dense
+type Sequential struct {
+	Layers []Layer
 }
 
-func NewRNN(layers []layer.Dense) RNN {
-	return RNN{
+func NewSequential(layers []Layer) Sequential {
+	return Sequential{
 		Layers: layers,
 	}
 }
 
-func (r *RNN) Predict(input linalg.Matrix[float64]) linalg.Matrix[float64] {
+func (r *Sequential) Predict(input linalg.Matrix[float64]) linalg.Matrix[float64] {
 	output := r.Layers[0].Forward(input)
 	for _, dense := range r.Layers[1:] {
 		output = dense.Forward(output)
