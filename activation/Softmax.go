@@ -3,7 +3,19 @@ package activation
 import (
 	"math"
 	"tensors-processing/linalg"
+	"tensors-processing/nn"
 )
+
+type SoftmaxStruct struct {
+}
+
+func NewSoftmax() nn.Layer {
+	return &SoftmaxStruct{}
+}
+
+func (s *SoftmaxStruct) Forward(inputs linalg.Matrix[float64]) linalg.Matrix[float64] {
+	return Softmax(inputs)
+}
 
 func Softmax(matrix linalg.Matrix[float64]) linalg.Matrix[float64] {
 
