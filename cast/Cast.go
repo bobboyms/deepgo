@@ -2,6 +2,18 @@ package cast
 
 import "tensors-processing/linalg"
 
+func Float64ToT[T linalg.NumTypes](matrix linalg.Matrix[float64]) linalg.Matrix[T] {
+	row, col := matrix.LocalShape()
+
+	data := make([]T, row*col)
+
+	for i, t := range matrix.LocalData() {
+		data[i] = T(t)
+	}
+
+	return linalg.NewMatrix(data, row, col)
+}
+
 func CastToInt8[T linalg.NumTypes](matrix linalg.Matrix[T]) linalg.Matrix[int8] {
 	row, col := matrix.LocalShape()
 	return linalg.NewMatrix(ToInt8(matrix.LocalData()), row, col)

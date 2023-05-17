@@ -3,9 +3,7 @@ package main
 import (
 	"log"
 	"math"
-	"tensors-processing/activation"
 	"tensors-processing/linalg"
-	"tensors-processing/nn"
 )
 
 func CreateArr(a int) []float64 {
@@ -31,16 +29,17 @@ func crossEntropy(yTrue, yPred []float64) float64 {
 
 func main() {
 
-	input := linalg.NewMatrix([]float64{5.2, 4, 6}, 1, 3)
-
-	rnn := nn.NewSequential([]nn.Layer{
-		nn.NewDense(3, 4),
-		nn.NewDense(4, 8),
-		nn.NewDense(8, 1),
-		activation.NewReLU(),
-	})
-
-	rnn.Predict(input).Print()
+	//input := linalg.NewMatrix([]float64{5.2, 4, 6}, 1, 3)
+	//
+	//rnn := nn.NewSequential([]nn.Layer{
+	//	nn.NewDense(3, 4),
+	//	activation.NewSigmoid(),
+	//	nn.NewDense(4, 80),
+	//	activation.NewSigmoid(),
+	//	nn.NewDense(80, 5),
+	//	activation.NewSoftmax(),
+	//})
+	//rnn.Predict(input).Print()
 	//
 	//linalg.Log(input).Print()
 	//
@@ -53,6 +52,18 @@ func main() {
 	//
 	//r := linalg.Dot(newTensorA.Transpose(), cast.CastToFloat32(newTensorB))
 	//linalg.Sum(r, newTensorC).Print()
+
+	newTensorA := linalg.NewMatrix(CreateArr(5*3), 5, 3)
+	newTensorB := linalg.NewMatrix(CreateArr(5*3), 5, 3)
+
+	//start := time.Now()
+	linalg.Dot(newTensorA.Transpose(), newTensorB).Print()
+	println("++++")
+	linalg.Dot2(newTensorA.Transpose(), newTensorB).Print()
+	//elapsed := time.Since(start)
+	//sum := elapsed.Milliseconds()
+	//
+	//fmt.Println(sum)
 
 	//var sum int64 = 0
 	//for i := 0; i < 100; i++ {

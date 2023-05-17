@@ -44,7 +44,6 @@ func CreateRandomData(size int) []float64 {
 	}
 
 	return data
-
 }
 
 func (t *TensorStruct[T]) Clone() Matrix[T] {

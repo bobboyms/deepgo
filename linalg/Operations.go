@@ -15,11 +15,11 @@ func Log[T NumTypes](matrix Matrix[T]) Matrix[T] {
 }
 
 func Reduce[T NumTypes](matrix Matrix[T]) T {
-	sum := 0.0
+	var sum T
 	for _, t := range matrix.LocalData() {
-		sum += float64(t)
+		sum += t
 	}
-	return T(sum)
+	return sum
 }
 
 func Mul[T NumTypes](matrixA, matrixB Matrix[T]) Matrix[T] {
