@@ -37,7 +37,7 @@ func Dot[T NumTypes](matrixA, matrixB Matrix[T]) Matrix[T] {
 	results := make(chan result[T], rowA*colB)
 
 	// Start a fixed number of workers
-	numWorkers := 20
+	numWorkers := rowA + colB
 	var wg sync.WaitGroup
 	wg.Add(numWorkers)
 	for w := 0; w < numWorkers; w++ {
