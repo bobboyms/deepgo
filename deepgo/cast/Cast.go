@@ -1,6 +1,8 @@
 package cast
 
-import "tensors-processing/linalg"
+import (
+	"tensors-processing/deepgo/linalg"
+)
 
 func Float64ToT[T linalg.NumTypes](matrix linalg.Matrix[float64]) linalg.Matrix[T] {
 	row, col := matrix.LocalShape()
@@ -12,6 +14,11 @@ func Float64ToT[T linalg.NumTypes](matrix linalg.Matrix[float64]) linalg.Matrix[
 	}
 
 	return linalg.NewMatrix(data, row, col)
+}
+
+func CastToInt[T linalg.NumTypes](matrix linalg.Matrix[T]) linalg.Matrix[int] {
+	row, col := matrix.LocalShape()
+	return linalg.NewMatrix(ToInt(matrix.LocalData()), row, col)
 }
 
 func CastToInt8[T linalg.NumTypes](matrix linalg.Matrix[T]) linalg.Matrix[int8] {
@@ -42,6 +49,17 @@ func CastToFloat32[T linalg.NumTypes](matrix linalg.Matrix[T]) linalg.Matrix[flo
 func CastToFloat64[T linalg.NumTypes](matrix linalg.Matrix[T]) linalg.Matrix[float64] {
 	row, col := matrix.LocalShape()
 	return linalg.NewMatrix(ToFloat64(matrix.LocalData()), row, col)
+}
+
+func ToInt[T linalg.NumTypes](data []T) []int {
+
+	newData := make([]int, len(data))
+
+	for i, val := range data {
+		newData[i] = int(val)
+	}
+
+	return newData
 }
 
 func ToInt8[T linalg.NumTypes](data []T) []int8 {

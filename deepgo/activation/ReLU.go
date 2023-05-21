@@ -1,20 +1,8 @@
 package activation
 
 import (
-	"tensors-processing/linalg"
-	"tensors-processing/nn"
+	"tensors-processing/deepgo/linalg"
 )
-
-type ReLUStruct struct {
-}
-
-func NewReLU() nn.Layer {
-	return &ReLUStruct{}
-}
-
-func (r ReLUStruct) Forward(inputs linalg.Matrix[float64]) linalg.Matrix[float64] {
-	return ReLU(inputs)
-}
 
 func ReLU(matrix linalg.Matrix[float64]) linalg.Matrix[float64] {
 

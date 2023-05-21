@@ -1,7 +1,7 @@
 package nn
 
 import (
-	"tensors-processing/linalg"
+	"tensors-processing/deepgo/linalg"
 )
 
 type Sequential struct {

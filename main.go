@@ -1,87 +1,92 @@
 package main
 
 import (
-	"log"
-	"math"
-	"tensors-processing/linalg"
+	"fmt"
+	"tensors-processing/deepgo/activation"
+	"tensors-processing/deepgo/linalg"
+	"tensors-processing/deepgo/loss"
+	"tensors-processing/deepgo/nn"
 )
-
-func CreateArr(a int) []float64 {
-	var x []float64
-	for i := 0; i < a; i++ {
-		x = append(x, float64(i))
-	}
-	return x
-}
-
-func crossEntropy(yTrue, yPred []float64) float64 {
-	if len(yTrue) != len(yPred) {
-		log.Fatalf("yTrue e yPred devem ter o mesmo tamanho, mas têm tamanhos %d e %d", len(yTrue), len(yPred))
-	}
-
-	var loss float64
-	for i := range yTrue {
-		loss += yTrue[i] * math.Log(yPred[i])
-	}
-
-	return -loss
-}
 
 func main() {
 
-	//input := linalg.NewMatrix([]float64{5.2, 4, 6}, 1, 3)
-	//
-	//rnn := nn.NewSequential([]nn.Layer{
-	//	nn.NewDense(3, 4),
-	//	activation.NewSigmoid(),
-	//	nn.NewDense(4, 80),
-	//	activation.NewSigmoid(),
-	//	nn.NewDense(80, 5),
-	//	activation.NewSoftmax(),
-	//})
-	//rnn.Predict(input).Print()
-	//
-	//linalg.Log(input).Print()
-	//
-	//newTensorA := linalg.NewMatrix([]float64{0.7, 0.1, 0.2}, 1, 3)
-	//newTensorB := linalg.NewMatrix([]float64{1, 0, 0}, 1, 3)
-	//
-	//fmt.Println(loss.CrossEntropy(newTensorB, newTensorA))
+	X := linalg.NewMatrix([]float64{0.1, 0.98, 0.98, 0.5, 0.5, 0.2, 1, 0}, 4, 2)
+	Y := linalg.NewMatrix([]float64{0, 1, 0, 1}, 4, 1)
 
-	//newTensorC := linalg.NewMatrix([]float32{3, 3}, 1, 2)
-	//
-	//r := linalg.Dot(newTensorA.Transpose(), cast.CastToFloat32(newTensorB))
-	//linalg.Sum(r, newTensorC).Print()
+	//w1 := linalg.NewMatrixFrom2D([][]float64{{0.37964287, 0.97761403, 0.70293974}, {0.24318438, 0.89182217, 0.79628823}}, 2, 3)
+	layer1 := nn.NewDense(2, 6, activation.Sigmoid)
 
-	newTensorA := linalg.NewMatrix(CreateArr(5*3), 5, 3)
-	newTensorB := linalg.NewMatrix(CreateArr(5*3), 5, 3)
+	//w2 := linalg.NewMatrixFrom2D([][]float64{{0.58468626, 0.24506299}, {0.1914211, 0.9668479}, {0.42943575, 0.3241452}}, 3, 2)
+	layer2 := nn.NewDense(6, 3, activation.Sigmoid)
 
-	//start := time.Now()
-	linalg.Dot(newTensorA.Transpose(), newTensorB).Print()
-	println("++++")
-	linalg.Dot2(newTensorA.Transpose(), newTensorB).Print()
-	//elapsed := time.Since(start)
-	//sum := elapsed.Milliseconds()
-	//
-	//fmt.Println(sum)
+	//w3 := linalg.NewMatrixFrom2D([][]float64{{0.91123983}, {0.12691277}}, 2, 1)
+	layer3 := nn.NewDense(3, 1, activation.Sigmoid)
 
-	//var sum int64 = 0
-	//for i := 0; i < 100; i++ {
-	//	start := time.Now()
-	//	linalg.Dot(newTensorA.Transpose(), newTensorB)
-	//	elapsed := time.Since(start)
-	//	sum += elapsed.Milliseconds()
-	//}
-	//fmt.Println(sum / 100)
-	//
-	//
-	//sum = 0
-	//for i := 0; i < 100; i++ {
-	//	start := time.Now()
-	//	linalg.DotX(newTensorA, newTensorB)
-	//	elapsed := time.Since(start)
-	//	sum += elapsed.Milliseconds()
-	//}
-	//fmt.Println(sum / 100)
+	learningRate := 0.7
+
+	for epoch := 0; epoch < 300; epoch++ {
+		xRow, xCol := X.LocalShape()
+		yRow, yCol := Y.LocalShape()
+		xRows := linalg.GetRow(X.LocalData(), xRow, xCol)
+		yRows := linalg.GetRow(Y.LocalData(), yRow, yCol)
+
+		totalLoss := 0.0
+		for i := range xRows {
+			xi := linalg.NewMatrix(xRows[i], 1, xCol)
+			yi := linalg.NewMatrix(yRows[i], 1, yCol)
+
+			r1 := layer1.Forward(xi)
+			r2 := layer2.Forward(r1)
+			output := layer3.Forward(r2)
+
+			//calcula o erro
+			lossx := loss.Mse(yi, output)
+			totalLoss += lossx
+
+			/////////////////////////////////////////////////////////////////////////////////////
+			//Execute a etapa de backpropagation com SGD
+
+			//Calcule os erros na última camada (output layer)
+			//O erro é a diferença entre a saída desejada (Y) e a saída atual (output)
+			//Aplique a derivada da função de ativação (sigmoid) para obter a taxa de erro
+			w3Deltas := linalg.Mul(linalg.Sub(output, yi), activation.SigmoidDerivative(output))
+
+			// Propague o erro para trás, para a camada escondida anterior (segunda camada escondida)
+			// O erro é a matriz transposta dos pesos da camada de saída (weights3) multiplicada pelo erro da camada de saída
+			// Em seguida, aplique a derivada da função de ativação (sigmoid) para obter a taxa de erro
+			// self.weights2_deltas = np.dot(self.weights3_deltas, self.weights3.T) * self.sigmoid_derivative(self.hidden_layer2)
+			w2Deltas := linalg.Mul(linalg.Dot(w3Deltas, layer3.W().Transpose()), activation.SigmoidDerivative(r2))
+
+			// Propague o erro para trás, para a camada escondida anterior (primeira camada escondida)
+			// O erro é a matriz transposta dos pesos da segunda camada escondida (weights2) multiplicada pelo erro da segunda camada escondida
+			// Em seguida, aplique a derivada da função de ativação (sigmoid) para obter a taxa de erro
+			// self.weights1_deltas = np.dot(self.weights2_deltas, self.weights2.T) * self.sigmoid_derivative(self.hidden_layer1)
+			w1Deltas := linalg.Mul(linalg.Dot(w2Deltas, layer2.W().Transpose()), activation.SigmoidDerivative(r1))
+
+			//# Atualize os pesos da camada de saída (weights3) subtraindo o produto da taxa de erro da camada de saída e a matriz transposta da segunda camada escondida
+			// self.weights3 = self.weights3 - learning_rate * np.dot(self.hidden_layer2.T, self.weights3_deltas)
+			newWeights3 := linalg.Sub(layer3.W(), linalg.MulScalar(learningRate, linalg.Dot(r2.Transpose(), w3Deltas)))
+			layer3.ChangeW(newWeights3)
+
+			//# Atualize os pesos da segunda camada escondida (weights2) subtraindo o produto da taxa de erro da segunda camada escondida e a matriz transposta da primeira camada escondida
+			//self.weights2 -= np.dot(self.hidden_layer1.T, self.weights2_deltas)
+			//newWeights2 := linalg.Sub(layer2.W(), linalg.Dot(r1.Transpose(), w2Deltas))
+			newWeights2 := linalg.Sub(layer2.W(), linalg.MulScalar(learningRate, linalg.Dot(r1.Transpose(), w2Deltas)))
+			layer2.ChangeW(newWeights2)
+
+			// Atualize os pesos da primeira camada escondida (weights1) subtraindo o produto da taxa de erro da primeira camada escondida e a matriz transposta da entrada (X)
+			// self.weights1 -= np.dot(X.T, self.weights1_deltas)
+			//newWeights1 := linalg.Sub(layer1.W(), linalg.Dot(xi.Transpose(), w1Deltas))
+			newWeights1 := linalg.Sub(layer1.W(), linalg.MulScalar(learningRate, linalg.Dot(xi.Transpose(), w1Deltas)))
+			layer1.ChangeW(newWeights1)
+
+		}
+
+		meanLoss := totalLoss / float64(xRow)
+		if epoch%100 == 0 {
+			fmt.Printf("Epoch: %d, Loss: %f\n", epoch, meanLoss)
+		}
+
+	}
 
 }

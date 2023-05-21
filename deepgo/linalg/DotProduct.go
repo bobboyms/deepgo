@@ -122,3 +122,15 @@ func GetRow[T NumTypes](matrix []T, row, col int) [][]T {
 	}
 	return tempMatrix
 }
+
+func GetRowFloat64(matrix []float64, row, col int) [][]float64 {
+	start := 0
+	end := col
+	var tempMatrix [][]float64
+	for i := 0; i < row; i++ {
+		tempMatrix = append(tempMatrix, matrix[start:end])
+		start = end
+		end = start + col
+	}
+	return tempMatrix
+}

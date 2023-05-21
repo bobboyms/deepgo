@@ -34,6 +34,21 @@ func NewMatrix[T NumTypes](data []T, row, col int) Matrix[T] {
 	}
 }
 
+func NewMatrixFrom2D[T NumTypes](data [][]T, row, col int) Matrix[T] {
+	return NewMatrix(FlatData(data), row, col)
+}
+
+func FlatData[T NumTypes](data [][]T) []T {
+
+	var flated []T
+	for _, datum := range data {
+		for _, v := range datum {
+			flated = append(flated, v)
+		}
+	}
+	return flated
+}
+
 func CreateRandomData(size int) []float64 {
 
 	data := make([]float64, size)
