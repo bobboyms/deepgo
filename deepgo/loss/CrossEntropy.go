@@ -5,10 +5,6 @@ import (
 	"tensors-processing/deepgo/linalg"
 )
 
-func CrossEntropy(yTrue, yPred linalg.Matrix[float64]) float64 {
-	return -linalg.Reduce(linalg.Mul(yTrue, linalg.Log(yPred)))
-}
-
 //def mse_loss_derivative(y_true, y_pred):
 //"""Derivada da função de custo - Erro quadrático médio"""
 //return 2 * (y_pred - y_true) / y_true.size

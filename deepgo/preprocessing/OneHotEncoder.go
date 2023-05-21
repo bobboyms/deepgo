@@ -24,3 +24,13 @@ func OneHotEncoder[T linalg.NumTypes](y []T) linalg.Matrix[T] {
 
 	return linalg.NewMatrixFrom2D(oneHot, len(y), int(numCategories))
 }
+
+func OneHotDecode(vec []float64) int {
+	maxIdx := 0
+	for i := 1; i < len(vec); i++ {
+		if vec[i] > vec[maxIdx] {
+			maxIdx = i
+		}
+	}
+	return maxIdx
+}

@@ -6,6 +6,7 @@ import (
 	"tensors-processing/deepgo/datasets"
 	"tensors-processing/deepgo/linalg"
 	"tensors-processing/deepgo/loss"
+	"tensors-processing/deepgo/metrics"
 	"tensors-processing/deepgo/nn"
 	"tensors-processing/deepgo/preprocessing"
 )
@@ -18,7 +19,7 @@ func main() {
 	XN := preprocessing.NormalizeData(X)
 	YN := preprocessing.OneHotEncoder(Y.LocalData())
 
-	xTrain, _, yTrain, _ := datasets.TrainTestSplit(XN, YN, 0.2, 42)
+	xTrain, xTest, yTrain, yTest := datasets.TrainTestSplit(XN, YN, 0.2, 42)
 
 	//w1 := linalg.NewMatrixFrom2D([][]float64{{0.37964287, 0.97761403, 0.70293974}, {0.24318438, 0.89182217, 0.79628823}}, 2, 3)
 	layer1 := nn.NewDense(4, 6, activation.Sigmoid)
@@ -29,9 +30,9 @@ func main() {
 	//w3 := linalg.NewMatrixFrom2D([][]float64{{0.91123983}, {0.12691277}}, 2, 1)
 	layer3 := nn.NewDense(4, 4, activation.Sigmoid)
 
-	learningRate := 0.02
+	learningRate := 0.6
 
-	for epoch := 0; epoch < 1000; epoch++ {
+	for epoch := 0; epoch < 150; epoch++ {
 		xRow, xCol := xTrain.LocalShape()
 		yRow, yCol := yTrain.LocalShape()
 		xRows := linalg.GetRow(xTrain.LocalData(), xRow, xCol)
@@ -95,5 +96,12 @@ func main() {
 		}
 
 	}
+
+	r1 := layer1.Forward(xTest)
+	r2 := layer2.Forward(r1)
+	output := layer3.Forward(r2)
+
+	fmt.Println("-------------------")
+	fmt.Printf("Accuracy: %f", metrics.Accuracy(yTest, output))
 
 }
