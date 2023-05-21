@@ -1,19 +1,7 @@
-package main
+This code represents the construction of a multi-layer neural network written in Go (golang). It's a complete implementation. The training is carried out via backpropagation through Stochastic Gradient Descent (SGD).
 
-import (
-	"fmt"
-	"tensors-processing/deepgo/activation"
-	"tensors-processing/deepgo/datasets"
-	"tensors-processing/deepgo/linalg"
-	"tensors-processing/deepgo/loss"
-	"tensors-processing/deepgo/metrics"
-	"tensors-processing/deepgo/nn"
-	"tensors-processing/deepgo/preprocessing"
-)
-
-func main() {
-
-	ds := datasets.NewIrisDataSet()
+```Go
+ds := datasets.NewIrisDataSet()
 	X, Y := preprocessing.SeparateXY(linalg.NewMatrixFrom2D(ds.GetData(), len(ds.GetData()), len(ds.GetData()[0])))
 
 	XN := preprocessing.NormalizeData(X)
@@ -92,5 +80,4 @@ func main() {
 
 	fmt.Println("-------------------")
 	fmt.Printf("Accuracy: %f", metrics.Accuracy(yTest, output))
-
-}
+```
