@@ -72,13 +72,20 @@ func findMinMax(arr [][]float64) (float64, float64) {
 	return min, max
 }
 
-func Normalize(arr [][]float64) [][]float64 {
-	min, max := findMinMax(arr)
-	for i, subArr := range arr {
-		for j, val := range subArr {
-			arr[i][j] = (2 * (val - min) / (max - min)) - 1
+func SeparateXY(matrix linalg.Matrix[float64]) (linalg.Matrix[float64], linalg.Matrix[float64]) {
+	numRows, numCols := matrix.LocalShape()
+	data := linalg.GetRow(matrix.LocalData(), numRows, numCols)
+
+	X := make([][]float64, numRows)
+	Y := make([]float64, numRows)
+
+	for i := 0; i < numRows; i++ {
+		X[i] = make([]float64, numCols-1)
+		for j := 0; j < numCols-1; j++ {
+			X[i][j] = data[i][j]
 		}
+		Y[i] = data[i][numCols-1]
 	}
 
-	return arr
+	return linalg.NewMatrixFrom2D(X, numRows, numCols-1), linalg.NewMatrix(Y, numRows, 1)
 }

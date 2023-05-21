@@ -3,32 +3,39 @@ package main
 import (
 	"fmt"
 	"tensors-processing/deepgo/activation"
+	"tensors-processing/deepgo/datasets"
 	"tensors-processing/deepgo/linalg"
 	"tensors-processing/deepgo/loss"
 	"tensors-processing/deepgo/nn"
+	"tensors-processing/deepgo/preprocessing"
 )
 
 func main() {
 
-	X := linalg.NewMatrix([]float64{0.1, 0.98, 0.98, 0.5, 0.5, 0.2, 1, 0}, 4, 2)
-	Y := linalg.NewMatrix([]float64{0, 1, 0, 1}, 4, 1)
+	ds := datasets.NewIrisDataSet()
+	X, Y := preprocessing.SeparateXY(linalg.NewMatrixFrom2D(ds.GetData(), len(ds.GetData()), len(ds.GetData()[0])))
+
+	XN := preprocessing.NormalizeData(X)
+	YN := preprocessing.OneHotEncoder(Y.LocalData())
+
+	xTrain, _, yTrain, _ := datasets.TrainTestSplit(XN, YN, 0.2, 42)
 
 	//w1 := linalg.NewMatrixFrom2D([][]float64{{0.37964287, 0.97761403, 0.70293974}, {0.24318438, 0.89182217, 0.79628823}}, 2, 3)
-	layer1 := nn.NewDense(2, 6, activation.Sigmoid)
+	layer1 := nn.NewDense(4, 6, activation.Sigmoid)
 
 	//w2 := linalg.NewMatrixFrom2D([][]float64{{0.58468626, 0.24506299}, {0.1914211, 0.9668479}, {0.42943575, 0.3241452}}, 3, 2)
-	layer2 := nn.NewDense(6, 3, activation.Sigmoid)
+	layer2 := nn.NewDense(6, 4, activation.Sigmoid)
 
 	//w3 := linalg.NewMatrixFrom2D([][]float64{{0.91123983}, {0.12691277}}, 2, 1)
-	layer3 := nn.NewDense(3, 1, activation.Sigmoid)
+	layer3 := nn.NewDense(4, 4, activation.Sigmoid)
 
-	learningRate := 0.7
+	learningRate := 0.02
 
-	for epoch := 0; epoch < 300; epoch++ {
-		xRow, xCol := X.LocalShape()
-		yRow, yCol := Y.LocalShape()
-		xRows := linalg.GetRow(X.LocalData(), xRow, xCol)
-		yRows := linalg.GetRow(Y.LocalData(), yRow, yCol)
+	for epoch := 0; epoch < 1000; epoch++ {
+		xRow, xCol := xTrain.LocalShape()
+		yRow, yCol := yTrain.LocalShape()
+		xRows := linalg.GetRow(xTrain.LocalData(), xRow, xCol)
+		yRows := linalg.GetRow(yTrain.LocalData(), yRow, yCol)
 
 		totalLoss := 0.0
 		for i := range xRows {
@@ -83,7 +90,7 @@ func main() {
 		}
 
 		meanLoss := totalLoss / float64(xRow)
-		if epoch%100 == 0 {
+		if epoch%10 == 0 {
 			fmt.Printf("Epoch: %d, Loss: %f\n", epoch, meanLoss)
 		}
 
