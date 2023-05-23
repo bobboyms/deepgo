@@ -86,11 +86,17 @@ func main() {
 
 	}
 
-	r1 := layer1.Forward(xTest)
-	r2 := layer2.Forward(r1)
-	output := layer3.Forward(r2)
+	row, col := xTest.LocalShape()
+	rows := linalg.GetRow(xTest.LocalData(), row, col)
+
+	outputs := make([][]float64, row)
+	for i, test := range rows {
+		r1 := layer1.Forward(linalg.NewMatrix(test, 1, col))
+		r2 := layer2.Forward(r1)
+		outputs[i] = layer3.Forward(r2).LocalData()
+	}
 
 	fmt.Println("-------------------")
-	fmt.Printf("Accuracy: %f", metrics.Accuracy(yTest, output))
+	fmt.Printf("Accuracy: %f", metrics.Accuracy(yTest, linalg.NewMatrixFrom2D(outputs, row, col)))
 
 }

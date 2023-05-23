@@ -19,15 +19,6 @@ func NewDense(numInputs, numNeurons int, activation func(matrix linalg.Matrix[fl
 	}
 }
 
-func NewDenseWithWeights(numInputs, numNeurons int, weights linalg.Matrix[float64], activation func(matrix linalg.Matrix[float64]) linalg.Matrix[float64]) Layer {
-
-	return &Dense{
-		Activation: activation,
-		Weights:    weights,
-		//Biases:     linalg.NewMatrix(b, 1, numNeurons),
-	}
-}
-
 func (d *Dense) B() linalg.Matrix[float64] {
 	return d.Biases
 }
@@ -46,6 +37,5 @@ func (d *Dense) W() linalg.Matrix[float64] {
 
 func (d *Dense) Forward(inputs linalg.Matrix[float64]) linalg.Matrix[float64] {
 	dotResult := linalg.Dot(inputs, d.Weights)
-	//d.Activation(linalg.Sum(dotResult, d.Biases))
-	return d.Activation(dotResult)
+	return d.Activation(linalg.Sum(dotResult, d.Biases))
 }

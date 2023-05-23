@@ -1,19 +1,36 @@
+
+# Introduction
+
 This code represents the construction of a multi-layer neural network written in Go (golang). It's a complete implementation. The training is carried out via backpropagation through Stochastic Gradient Descent (SGD).
+
+## Dataset
+
+In this example, we will use the Iris dataset, widely known in the machine learning field. The code below is organized in such a way that the data are initially separated into two distinct sets: one for training and another for testing.
+
+The code starts with the creation of the Iris dataset using the command ds := datasets.NewIrisDataSet(). After this, the inputs (flower features) and outputs (flower species) are separated using the preprocessing.SeparateXY function. Subsequently, this data is normalized and preprocessed to be used in the neural network. For the inputs, we use preprocessing.NormalizeData(X) to scale the data to a standard range. For the outputs, the preprocessing.OneHotEncoder(Y.LocalData()) function is used to transform the class labels into a format suitable for training neural networks.
+
+Finally, the datasets.TrainTestSplit(XN, YN, 0.2, 42) function splits the dataset into a training set and a test set, reserving 20% of the data for the test set.
 
 ```Go
 ds := datasets.NewIrisDataSet()
-	X, Y := preprocessing.SeparateXY(linalg.NewMatrixFrom2D(ds.GetData(), len(ds.GetData()), len(ds.GetData()[0])))
+X, Y := preprocessing.SeparateXY(linalg.NewMatrixFrom2D(ds.GetData(), len(ds.GetData()), len(ds.GetData()[0])))
 
-	XN := preprocessing.NormalizeData(X)
-	YN := preprocessing.OneHotEncoder(Y.LocalData())
+XN := preprocessing.NormalizeData(X)
+YN := preprocessing.OneHotEncoder(Y.LocalData())
 
-	xTrain, xTest, yTrain, yTest := datasets.TrainTestSplit(XN, YN, 0.2, 42)
+xTrain, xTest, yTrain, yTest := datasets.TrainTestSplit(XN, YN, 0.2, 42)
+```
 
-	layer1 := nn.NewDense(4, 6, activation.Sigmoid)
-	layer2 := nn.NewDense(6, 4, activation.Sigmoid)
-	layer3 := nn.NewDense(4, 4, activation.Sigmoid)
+## Build Neural Network
 
-	learningRate := 0.6
+```Go
+
+
+layer1 := nn.NewDense(4, 6, activation.Sigmoid)
+layer2 := nn.NewDense(6, 4, activation.Sigmoid)
+layer3 := nn.NewDense(4, 4, activation.Sigmoid)
+
+learningRate := 0.6
 
 	for epoch := 0; epoch < 150; epoch++ {
 		xRow, xCol := xTrain.LocalShape()
