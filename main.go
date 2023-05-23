@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"tensors-processing/deepgo/activation"
 	"tensors-processing/deepgo/datasets"
 	"tensors-processing/deepgo/linalg"
@@ -13,6 +14,8 @@ import (
 
 func main() {
 
+	rand.Seed(0)
+
 	ds := datasets.NewIrisDataSet()
 	X, Y := preprocessing.SeparateXY(linalg.NewMatrixFrom2D(ds.GetData(), len(ds.GetData()), len(ds.GetData()[0])))
 
@@ -22,12 +25,13 @@ func main() {
 	xTrain, xTest, yTrain, yTest := datasets.TrainTestSplit(XN, YN, 0.2, 42)
 
 	layer1 := nn.NewDense(4, 6, activation.Sigmoid)
-	layer2 := nn.NewDense(6, 4, activation.Sigmoid)
-	layer3 := nn.NewDense(4, 4, activation.Sigmoid)
+	layer2 := nn.NewDense(6, 8, activation.Sigmoid)
+	layer3 := nn.NewDense(8, 4, activation.Sigmoid)
 
-	learningRate := 0.6
+	learningRate := 0.01
+	l2Lambda := 0.001
 
-	for epoch := 0; epoch < 150; epoch++ {
+	for epoch := 0; epoch < 400; epoch++ {
 		xRow, xCol := xTrain.LocalShape()
 		yRow, yCol := yTrain.LocalShape()
 		xRows := linalg.GetRow(xTrain.LocalData(), xRow, xCol)
@@ -66,15 +70,21 @@ func main() {
 
 			//# Atualize os pesos da camada de saída (weights3) subtraindo o produto da taxa de erro da camada de saída e a matriz transposta da segunda camada escondida
 			// self.weights3 = self.weights3 - learning_rate * np.dot(self.hidden_layer2.T, self.weights3_deltas)
-			newWeights3 := linalg.Sub(layer3.W(), linalg.MulScalar(learningRate, linalg.Dot(r2.Transpose(), w3Deltas)))
+			//regularização L2
+			reg3 := linalg.Sum(linalg.Dot(r2.Transpose(), w3Deltas), linalg.MulScalar(l2Lambda, layer3.W()))
+			newWeights3 := linalg.Sub(layer3.W(), linalg.MulScalar(learningRate, reg3))
 			layer3.ChangeW(newWeights3)
 
+			//+ l2_lambda * W3
+
 			//# Atualize os pesos da segunda camada escondida (weights2) subtraindo o produto da taxa de erro da segunda camada escondida e a matriz transposta da primeira camada escondida
-			newWeights2 := linalg.Sub(layer2.W(), linalg.MulScalar(learningRate, linalg.Dot(r1.Transpose(), w2Deltas)))
+			reg2 := linalg.Sum(linalg.Dot(r1.Transpose(), w2Deltas), linalg.MulScalar(l2Lambda, layer2.W()))
+			newWeights2 := linalg.Sub(layer2.W(), linalg.MulScalar(learningRate, reg2))
 			layer2.ChangeW(newWeights2)
 
 			// Atualize os pesos da primeira camada escondida (weights1) subtraindo o produto da taxa de erro da primeira camada escondida e a matriz transposta da entrada (X)
-			newWeights1 := linalg.Sub(layer1.W(), linalg.MulScalar(learningRate, linalg.Dot(xi.Transpose(), w1Deltas)))
+			reg1 := linalg.Sum(linalg.Dot(xi.Transpose(), w1Deltas), linalg.MulScalar(l2Lambda, layer1.W()))
+			newWeights1 := linalg.Sub(layer1.W(), linalg.MulScalar(learningRate, reg1))
 			layer1.ChangeW(newWeights1)
 
 		}
