@@ -52,6 +52,16 @@ func MulScalar[T NumTypes](value T, matrix Matrix[T]) Matrix[T] {
 	return NewMatrix(temp, row, col)
 }
 
+func Pow[T NumTypes](matrix Matrix[T], value T) Matrix[T] {
+	data := matrix.LocalData()
+	temp := make([]T, len(data))
+	for i, t := range data {
+		temp[i] = T(math.Pow(float64(t), float64(value)))
+	}
+	row, col := matrix.LocalShape()
+	return NewMatrix(temp, row, col)
+}
+
 func SumAxis[T NumTypes](matrix Matrix[T], axis int) Matrix[T] {
 	sRow, sCol := matrix.LocalShape()
 	rows := GetRow(matrix.LocalData(), sRow, sCol)

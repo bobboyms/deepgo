@@ -1,0 +1,12 @@
+// Regularização L2 correta
+reg3 := linalg.Sum(linalg.Dot(r2.Transpose(), w3Deltas), linalg.MulScalar(l2Lambda, linalg.Pow(layer3.W(), 2)))
+newWeights3 := linalg.Sub(layer3.W(), linalg.MulScalar(learningRate, reg3))
+layer3.ChangeW(newWeights3)
+
+reg2 := linalg.Sum(linalg.Dot(r1.Transpose(), w2Deltas), linalg.MulScalar(l2Lambda, linalg.Pow(layer2.W(), 2)))
+newWeights2 := linalg.Sub(layer2.W(), linalg.MulScalar(learningRate, reg2))
+layer2.ChangeW(newWeights2)
+
+reg1 := linalg.Sum(linalg.Dot(xi.Transpose(), w1Deltas), linalg.MulScalar(l2Lambda, linalg.Pow(layer1.W(), 2)))
+newWeights1 := linalg.Sub(layer1.W(), linalg.MulScalar(learningRate, reg1))
+layer1.ChangeW(newWeights1)
