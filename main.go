@@ -31,7 +31,7 @@ func main() {
 	learningRate := 0.01
 	l2Lambda := 0.001
 
-	for epoch := 0; epoch < 400; epoch++ {
+	for epoch := 0; epoch < 6000; epoch++ {
 		xRow, xCol := xTrain.LocalShape()
 		yRow, yCol := yTrain.LocalShape()
 		xRows := linalg.GetRow(xTrain.LocalData(), xRow, xCol)
@@ -86,6 +86,17 @@ func main() {
 			reg1 := linalg.Sum(linalg.Dot(xi.Transpose(), w1Deltas), linalg.MulScalar(l2Lambda, layer1.W()))
 			newWeights1 := linalg.Sub(layer1.W(), linalg.MulScalar(learningRate, reg1))
 			layer1.ChangeW(newWeights1)
+
+			//Atualiza os biases
+			//self.biases3 -= biases3 - learning_rate * np.sum(self.weights3_deltas, axis=0)
+			newBiases3 := linalg.Sub(layer3.B(), linalg.MulScalar(learningRate, linalg.SumAxis(w3Deltas, 0)))
+			layer3.ChangeB(newBiases3)
+			//self.biases2 -= learning_rate * np.sum(self.weights2_deltas, axis=0)
+			newBiases2 := linalg.Sub(layer2.B(), linalg.MulScalar(learningRate, linalg.SumAxis(w2Deltas, 0)))
+			layer2.ChangeB(newBiases2)
+			//self.biases1 -= learning_rate * np.sum(self.weights1_deltas, axis=0)
+			newBiases1 := linalg.Sub(layer1.B(), linalg.MulScalar(learningRate, linalg.SumAxis(w1Deltas, 0)))
+			layer1.ChangeB(newBiases1)
 
 		}
 
