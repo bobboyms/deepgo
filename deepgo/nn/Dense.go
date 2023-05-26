@@ -37,5 +37,6 @@ func (d *Dense) W() linalg.Matrix[float64] {
 
 func (d *Dense) Forward(inputs linalg.Matrix[float64]) linalg.Matrix[float64] {
 	dotResult := linalg.Dot(inputs, d.Weights)
-	return d.Activation(linalg.Sum(dotResult, d.Biases))
+	_, row := dotResult.LocalShape()
+	return d.Activation(linalg.Sum(dotResult, linalg.NewBroadcasting(d.Biases, row)))
 }

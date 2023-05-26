@@ -1,13 +1,15 @@
 package linalg
 
-import "sync"
+import (
+	"sync"
+)
 
 func ProcessOperation[T NumTypes](matrixA, matrixB Matrix[T], operation func(vecA, vecB []T) []T) Matrix[T] {
 
 	rowA, colA := matrixA.LocalShape()
-	rowB, colB := matrixB.LocalShape()
+	_, colB := matrixB.LocalShape()
 
-	if (rowA != rowB) || (colB != colA) {
+	if colB != colA {
 		panic("The matrices must have the same shape.")
 	}
 

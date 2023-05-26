@@ -34,6 +34,18 @@ func NewMatrix[T NumTypes](data []T, row, col int) Matrix[T] {
 	}
 }
 
+func NewBroadcasting[T NumTypes](matrix Matrix[T], row int) Matrix[T] {
+	_, col := matrix.LocalShape()
+	matrixData := matrix.LocalData()
+
+	temData := make([][]T, row)
+	for i := 0; i < row; i++ {
+		temData[i] = matrixData
+	}
+
+	return NewMatrixFrom2D(temData, row, col)
+}
+
 func NewMatrixFrom2D[T NumTypes](data [][]T, row, col int) Matrix[T] {
 	return NewMatrix(FlatData(data), row, col)
 }
