@@ -15,7 +15,7 @@ type Matrix[T NumTypes] interface {
 	Clone() Matrix[T]
 }
 
-type TensorStruct[T NumTypes] struct {
+type MatrixStruct[T NumTypes] struct {
 	Data []T
 	Row  int
 	Col  int
@@ -27,7 +27,7 @@ type NumTypes interface {
 
 func NewMatrix[T NumTypes](data []T, row, col int) Matrix[T] {
 	ValidateShapeFromData(data, row, col)
-	return &TensorStruct[T]{
+	return &MatrixStruct[T]{
 		Data: data,
 		Row:  row,
 		Col:  col,
@@ -35,6 +35,7 @@ func NewMatrix[T NumTypes](data []T, row, col int) Matrix[T] {
 }
 
 func NewBroadcasting[T NumTypes](matrix Matrix[T], row int) Matrix[T] {
+
 	_, col := matrix.LocalShape()
 	matrixData := matrix.LocalData()
 
@@ -73,19 +74,19 @@ func CreateRandomData(size int) []float64 {
 	return data
 }
 
-func (t *TensorStruct[T]) Clone() Matrix[T] {
+func (t *MatrixStruct[T]) Clone() Matrix[T] {
 	return NewMatrix(t.Data, t.Row, t.Col)
 }
 
-func (t *TensorStruct[T]) Transpose() Matrix[T] {
+func (t *MatrixStruct[T]) Transpose() Matrix[T] {
 	return NewMatrix(Transpose(t.Data, t.Row, t.Col), t.Col, t.Row)
 }
 
-func (t *TensorStruct[T]) LocalData() []T {
+func (t *MatrixStruct[T]) LocalData() []T {
 	return t.Data
 }
 
-func (t *TensorStruct[T]) Print() {
+func (t *MatrixStruct[T]) Print() {
 
 	start := 0
 	end := t.Col
@@ -96,11 +97,11 @@ func (t *TensorStruct[T]) Print() {
 	}
 }
 
-func (t *TensorStruct[T]) LocalShape() (int, int) {
+func (t *MatrixStruct[T]) LocalShape() (int, int) {
 	return t.Row, t.Col
 }
 
-func (t *TensorStruct[T]) Size() int {
+func (t *MatrixStruct[T]) Size() int {
 	return t.Row * t.Col
 }
 

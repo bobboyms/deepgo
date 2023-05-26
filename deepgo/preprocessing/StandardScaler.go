@@ -89,3 +89,20 @@ func SeparateXY(matrix linalg.Matrix[float64]) (linalg.Matrix[float64], linalg.M
 
 	return linalg.NewMatrixFrom2D(X, numRows, numCols-1), linalg.NewMatrix(Y, numRows, 1)
 }
+
+func CreateBatches(data [][]float64, batchSize int) [][][]float64 {
+	var batches [][][]float64
+
+	// Iterate over the data in steps of size `batchSize`
+	for i := 0; i < len(data); i += batchSize {
+		end := i + batchSize
+
+		if end > len(data) {
+			end = len(data)
+		}
+
+		batches = append(batches, data[i:end])
+	}
+
+	return batches
+}

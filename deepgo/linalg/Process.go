@@ -4,6 +4,19 @@ import (
 	"sync"
 )
 
+func Subslice[T NumTypes](arr []T, start int, end int) []T {
+	//if start < 0 || end > len(arr) || start > end {
+	//	panic("invalid start or end index")
+	//}
+
+	subslice := make([]T, end-start)
+	for i := start; i < end; i++ {
+		subslice[i-start] = arr[i]
+	}
+
+	return subslice
+}
+
 func ProcessOperation[T NumTypes](matrixA, matrixB Matrix[T], operation func(vecA, vecB []T) []T) Matrix[T] {
 
 	rowA, colA := matrixA.LocalShape()
@@ -15,6 +28,14 @@ func ProcessOperation[T NumTypes](matrixA, matrixB Matrix[T], operation func(vec
 
 	dataA := matrixA.LocalData()
 	dataB := matrixB.LocalData()
+
+	//rowDataA := GetRow(matrixA.LocalData(), rowA, colA)
+	//rowDataB := GetRow(matrixB.LocalData(), rowB, colB)
+	//
+	//if len(rowDataA) < 0 {
+	//	println("dsd")
+	//	println(rowDataB)
+	//}
 
 	start := 0
 	end := colA

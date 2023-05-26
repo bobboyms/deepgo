@@ -10,6 +10,7 @@ import (
 	"tensors-processing/deepgo/metrics"
 	"tensors-processing/deepgo/nn"
 	"tensors-processing/deepgo/preprocessing"
+	"tensors-processing/deepgo/regularization"
 )
 
 func main() {
@@ -31,19 +32,21 @@ func main() {
 	learningRate := 0.01
 	//l2Lambda := 0.001
 
-	for epoch := 0; epoch < 100; epoch++ {
-		xRow, xCol := xTrain.LocalShape()
-		yRow, yCol := yTrain.LocalShape()
-		xRows := linalg.GetRow(xTrain.LocalData(), xRow, xCol)
-		yRows := linalg.GetRow(yTrain.LocalData(), yRow, yCol)
+	xRow, xCol := xTrain.LocalShape()
+	yRow, yCol := yTrain.LocalShape()
+
+	xRows := preprocessing.CreateBatches(linalg.GetRow(xTrain.LocalData(), xRow, xCol), 50)
+	yRows := preprocessing.CreateBatches(linalg.GetRow(yTrain.LocalData(), yRow, yCol), 50)
+
+	for epoch := 0; epoch < 220; epoch++ {
 
 		totalLoss := 0.0
 		for i := range xRows {
-			xi := linalg.NewMatrix(xRows[i], 1, xCol)
-			yi := linalg.NewMatrix(yRows[i], 1, yCol)
+			xi := linalg.NewMatrixFrom2D(xRows[i], len(xRows[i]), xCol)
+			yi := linalg.NewMatrixFrom2D(yRows[i], len(yRows[i]), yCol)
 
 			r1 := layer1.Forward(xi)
-			r2 := layer2.Forward(r1)
+			r2 := layer2.Forward(regularization.Dropout(r1, 0.15))
 			output := layer3.Forward(r2)
 
 			//calcula o erro
@@ -95,17 +98,10 @@ func main() {
 
 	}
 
-	row, col := xTest.LocalShape()
-	rows := linalg.GetRow(xTest.LocalData(), row, col)
+	r1 := layer1.Forward(xTest)
+	r2 := layer2.Forward(r1)
+	outputs := layer3.Forward(r2)
 
-	outputs := make([][]float64, row)
-	for i, test := range rows {
-		r1 := layer1.Forward(linalg.NewMatrix(test, 1, col))
-		r2 := layer2.Forward(r1)
-		outputs[i] = layer3.Forward(r2).LocalData()
-	}
-
-	fmt.Println("-------------------")
-	fmt.Printf("Accuracy: %f", metrics.Accuracy(yTest, linalg.NewMatrixFrom2D(outputs, row, col)))
+	fmt.Printf("Accuracy: %f", metrics.Accuracy(yTest, outputs))
 
 }
