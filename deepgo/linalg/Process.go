@@ -17,48 +17,73 @@ func Subslice[T NumTypes](arr []T, start int, end int) []T {
 	return subslice
 }
 
-func ProcessOperation[T NumTypes](matrixA, matrixB Matrix[T], operation func(vecA, vecB []T) []T) Matrix[T] {
+//func ProcessOperation[T NumTypes](matrixA, matrixB Matrix[T], operation func(vecA, vecB []T) []T) Matrix[T] {
+//
+//	rowA, colA := matrixA.LocalShape()
+//	_, colB := matrixB.LocalShape()
+//
+//	if colB != colA {
+//		panic("The matrices must have the same shape.")
+//	}
+//
+//	dataA := matrixA.LocalData()
+//	dataB := matrixB.LocalData()
+//
+//	start := 0
+//	end := colA
+//	tempMatrix := make([][]T, rowA)
+//	var wg sync.WaitGroup
+//	wg.Add(rowA)
+//	for i := 0; i < rowA; i++ {
+//
+//		go func(i, start, end int) {
+//			defer wg.Done()
+//			tempMatrix[i] = operation(dataA[start:end], dataB[start:end])
+//		}(i, start, end)
+//
+//		start = end
+//		end = start + colA
+//	}
+//	wg.Wait()
+//
+//	var tempData []T
+//	for _, temp := range tempMatrix {
+//		for _, val := range temp {
+//			tempData = append(tempData, val)
+//		}
+//	}
+//
+//	return NewMatrix(tempData, rowA, colA)
+//}
 
+func ProcessOperation[T NumTypes](matrixA, matrixB Matrix[T], operation func(vecA, vecB []T) []T) Matrix[T] {
 	rowA, colA := matrixA.LocalShape()
 	_, colB := matrixB.LocalShape()
 
 	if colB != colA {
-		panic("The matrices must have the same shape.")
+		panic("As matrizes devem ter o mesmo formato.")
 	}
 
 	dataA := matrixA.LocalData()
 	dataB := matrixB.LocalData()
 
-	//rowDataA := GetRow(matrixA.LocalData(), rowA, colA)
-	//rowDataB := GetRow(matrixB.LocalData(), rowB, colB)
-	//
-	//if len(rowDataA) < 0 {
-	//	println("dsd")
-	//	println(rowDataB)
-	//}
-
-	start := 0
-	end := colA
 	tempMatrix := make([][]T, rowA)
 	var wg sync.WaitGroup
 	wg.Add(rowA)
 	for i := 0; i < rowA; i++ {
+		start := i * colA
+		end := start + colA
 
 		go func(i, start, end int) {
 			defer wg.Done()
 			tempMatrix[i] = operation(dataA[start:end], dataB[start:end])
 		}(i, start, end)
-
-		start = end
-		end = start + colA
 	}
 	wg.Wait()
 
 	var tempData []T
 	for _, temp := range tempMatrix {
-		for _, val := range temp {
-			tempData = append(tempData, val)
-		}
+		tempData = append(tempData, temp...)
 	}
 
 	return NewMatrix(tempData, rowA, colA)

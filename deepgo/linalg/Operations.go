@@ -2,6 +2,7 @@ package linalg
 
 import (
 	"math"
+	"sync"
 )
 
 func Log[T NumTypes](matrix Matrix[T]) Matrix[T] {
@@ -35,9 +36,29 @@ func SubScalar[T NumTypes](value T, matrix Matrix[T]) Matrix[T] {
 func DivScalar[T NumTypes](matrix Matrix[T], value T) Matrix[T] {
 	data := matrix.LocalData()
 	temp := make([]T, len(data))
+
 	for i, t := range data {
 		temp[i] = t / value
 	}
+	row, col := matrix.LocalShape()
+	return NewMatrix(temp, row, col)
+}
+
+func DivScalarAsync[T NumTypes](matrix Matrix[T], value T) Matrix[T] {
+	data := matrix.LocalData()
+	temp := make([]T, len(data))
+
+	var wg sync.WaitGroup
+	wg.Add(len(data))
+	for i, t := range data {
+
+		go func(i int, t, value T) {
+			defer wg.Done()
+			temp[i] = t / value
+		}(i, t, value)
+
+	}
+	wg.Wait()
 	row, col := matrix.LocalShape()
 	return NewMatrix(temp, row, col)
 }
@@ -65,27 +86,25 @@ func Pow[T NumTypes](matrix Matrix[T], value T) Matrix[T] {
 func SumAxis[T NumTypes](matrix Matrix[T], axis int) Matrix[T] {
 	sRow, sCol := matrix.LocalShape()
 	rows := GetRow(matrix.LocalData(), sRow, sCol)
+	size := len(rows[0])
+	sum := make([]T, size)
+
 	if axis == 0 {
-		size := len(rows[0])
-		sum := make([]T, size)
 		for _, row := range rows {
 			for i, val := range row {
 				sum[i] += val
 			}
 		}
-		return NewMatrix(sum, 1, size)
 	} else if axis == 1 {
-		size := len(rows[0])
-		sum := make([]T, size)
 		for i, row := range rows {
 			for _, val := range row {
 				sum[i] += val
 			}
 		}
-		return NewMatrix(sum, 1, size)
+	} else {
+		panic("Invalid axis, must be 0 or 1")
 	}
-
-	panic("invalid axis, it should be either 0 or 1")
+	return NewMatrix(sum, 1, size)
 }
 
 func Mul[T NumTypes](matrixA, matrixB Matrix[T]) Matrix[T] {

@@ -11,9 +11,12 @@ import (
 	"tensors-processing/deepgo/nn"
 	"tensors-processing/deepgo/preprocessing"
 	"tensors-processing/deepgo/regularization"
+	"time"
 )
 
 func main() {
+
+	start := time.Now()
 
 	rand.Seed(0)
 
@@ -25,8 +28,10 @@ func main() {
 
 	xTrain, xTest, yTrain, yTest := datasets.TrainTestSplit(XN, YN, 0.2, 42)
 
-	layer1 := nn.NewDense(4, 6, activation.Sigmoid)
-	layer2 := nn.NewDense(6, 8, activation.Sigmoid)
+	//fmt.Println(xTrain.Size())
+
+	layer1 := nn.NewDense(4, 7, activation.Sigmoid)
+	layer2 := nn.NewDense(7, 8, activation.Sigmoid)
 	layer3 := nn.NewDense(8, 4, activation.Sigmoid)
 
 	learningRate := 0.01
@@ -38,7 +43,7 @@ func main() {
 	xRows := preprocessing.CreateBatches(linalg.GetRow(xTrain.LocalData(), xRow, xCol), 50)
 	yRows := preprocessing.CreateBatches(linalg.GetRow(yTrain.LocalData(), yRow, yCol), 50)
 
-	for epoch := 0; epoch < 220; epoch++ {
+	for epoch := 0; epoch < 110; epoch++ {
 
 		totalLoss := 0.0
 		for i := range xRows {
@@ -50,8 +55,8 @@ func main() {
 			output := layer3.Forward(r2)
 
 			//calcula o erro
-			lossx := loss.Mse(yi, output)
-			totalLoss += lossx
+			totalLoss += loss.Mse(yi, output)
+			//totalLoss += lossx
 
 			/////////////////////////////////////////////////////////////////////////////////////
 			//Execute a etapa de backpropagation com SGD
@@ -91,7 +96,7 @@ func main() {
 
 		}
 
-		meanLoss := totalLoss / float64(xRow)
+		meanLoss := totalLoss / float64(len(xRows))
 		if epoch%10 == 0 {
 			fmt.Printf("Epoch: %d, Loss: %f\n", epoch, meanLoss)
 		}
@@ -102,6 +107,9 @@ func main() {
 	r2 := layer2.Forward(r1)
 	outputs := layer3.Forward(r2)
 
-	fmt.Printf("Accuracy: %f", metrics.Accuracy(yTest, outputs))
+	fmt.Printf("Accuracy: %f\n", metrics.Accuracy(yTest, outputs))
+
+	elapsed := time.Since(start)
+	fmt.Println("Tempo execução: ", elapsed)
 
 }
